@@ -204,18 +204,18 @@ def main(_):
             FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
 
         # Get the SSD network and its anchors.
-        ssd_class = nets_factory.get_network(FLAGS.model_name)
-        ssd_params = ssd_class.default_params._replace(num_classes=FLAGS.num_classes)
-        ssd_net = ssd_class(ssd_params)
-        ssd_shape = ssd_net.params.img_shape
-        ssd_anchors = ssd_net.anchors(ssd_shape)
+        yolov2_class = nets_factory.get_network(FLAGS.model_name)
+        yolov2_params = yolov2_class.default_params._replace(num_classes=FLAGS.num_classes)
+        yolov2_net = yolov2_class(yolov2_params)
+        ssd_shape = yolov2_net.params.img_shape
+        ssd_anchors = yolov2_net.anchors(ssd_shape)
 
         # Select the preprocessing function.
         preprocessing_name = FLAGS.preprocessing_name or FLAGS.model_name
         image_preprocessing_fn = preprocessing_factory.get_preprocessing(
             preprocessing_name, is_training=True)
 
-        tf_utils.print_configuration(FLAGS.__flags, ssd_params,
+        tf_utils.print_configuration(FLAGS.__flags, yolov2_params,
                                      dataset.data_sources, FLAGS.train_dir)
         # =================================================================== #
         # Create a dataset provider and batches.
@@ -239,7 +239,7 @@ def main(_):
                                        data_format=DATA_FORMAT)
             # Encode groundtruth labels and bboxes.
             gclasses, glocalisations, gscores = \
-                ssd_net.bboxes_encode(glabels, gbboxes, ssd_anchors)
+                yolov2_net.bboxes_encode(glabels, gbboxes, ssd_anchors)
             batch_shape = [1] + [len(ssd_anchors)] * 3
 
             # Training batches and queue.
@@ -268,13 +268,13 @@ def main(_):
                 tf_utils.reshape_list(batch_queue.dequeue(), batch_shape)
 
             # Construct SSD network.
-            arg_scope = ssd_net.arg_scope(weight_decay=FLAGS.weight_decay,
+            arg_scope = yolov2_net.arg_scope(weight_decay=FLAGS.weight_decay,
                                           data_format=DATA_FORMAT)
             with slim.arg_scope(arg_scope):
                 predictions, localisations, logits, end_points = \
-                    ssd_net.net(b_image, is_training=True)
+                    yolov2_net.net(b_image, is_training=True)
             # Add loss function.
-            ssd_net.losses(logits, localisations,
+            yolov2_net.losses(logits, localisations,
                            b_gclasses, b_glocalisations, b_gscores,
                            match_threshold=FLAGS.match_threshold,
                            negative_ratio=FLAGS.negative_ratio,
