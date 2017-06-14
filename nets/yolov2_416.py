@@ -64,7 +64,7 @@ slim = tf.contrib.slim
 # =========================================================================== #
 # SSD class definition.
 # =========================================================================== #
-SSDParams = namedtuple('SSDParameters', ['img_shape',
+YOLOv2Params = namedtuple('YOLOv2Parameters', ['img_shape',
                                          'num_classes',
                                          'no_annotation_label',
                                          'feat_layers',
@@ -79,7 +79,7 @@ SSDParams = namedtuple('SSDParameters', ['img_shape',
                                          ])
 
 
-class SSDNet(object):
+class YOLOv2Net(object):
     """Implementation of the SSD VGG-based 300 network.
 
     The default features layers with 300x300 image input are:
@@ -91,7 +91,7 @@ class SSDNet(object):
       conv11 ==> 1 x 1
     The default image size used to train this network is 300x300.
     """
-    default_params = SSDParams(
+    default_params = YOLOv2Params(
         img_shape=(300, 300),
         num_classes=21,
         no_annotation_label=21,
@@ -127,10 +127,10 @@ class SSDNet(object):
         """Init the SSD net with some parameters. Use the default ones
         if none provided.
         """
-        if isinstance(params, SSDParams):
+        if isinstance(params, YOLOv2Params):
             self.params = params
         else:
-            self.params = SSDNet.default_params
+            self.params = YOLOv2Net.default_params
 
     # ======================================================================= #
     def net(self, inputs,
@@ -142,7 +142,7 @@ class SSDNet(object):
             scope='ssd_300_vgg'):
         """SSD network definition.
         """
-        r = ssd_net(inputs,
+        r = yolov2_net(inputs,
                     num_classes=self.params.num_classes,
                     feat_layers=self.params.feat_layers,
                     anchor_sizes=self.params.anchor_sizes,
@@ -162,12 +162,12 @@ class SSDNet(object):
     def arg_scope(self, weight_decay=0.0005, data_format='NHWC'):
         """Network arg_scope.
         """
-        return ssd_arg_scope(weight_decay, data_format=data_format)
+        return yolov2_arg_scope(weight_decay, data_format=data_format)
 
     def arg_scope_caffe(self, caffe_scope):
         """Caffe arg_scope used for weights importing.
         """
-        return ssd_arg_scope_caffe(caffe_scope)
+        return yolov2_arg_scope_caffe(caffe_scope)
 
     # ======================================================================= #
     def update_feature_shapes(self, predictions):
@@ -236,10 +236,10 @@ class SSDNet(object):
                negative_ratio=3.,
                alpha=1.,
                label_smoothing=0.,
-               scope='ssd_losses'):
+               scope='yolov2_losses'):
         """Define the SSD network losses.
         """
-        return ssd_losses(logits, localisations,
+        return yolov2_losses(logits, localisations,
                           gclasses, glocalisations, gscores,
                           match_threshold=match_threshold,
                           negative_ratio=negative_ratio,
@@ -429,12 +429,12 @@ def ssd_multibox_layer(inputs,
     return cls_pred, loc_pred
 
 
-def ssd_net(inputs,
-            num_classes=SSDNet.default_params.num_classes,
-            feat_layers=SSDNet.default_params.feat_layers,
-            anchor_sizes=SSDNet.default_params.anchor_sizes,
-            anchor_ratios=SSDNet.default_params.anchor_ratios,
-            normalizations=SSDNet.default_params.normalizations,
+def yolov2_net(inputs,
+            num_classes=YOLOv2Net.default_params.num_classes,
+            feat_layers=YOLOv2Net.default_params.feat_layers,
+            anchor_sizes=YOLOv2Net.default_params.anchor_sizes,
+            anchor_ratios=YOLOv2Net.default_params.anchor_ratios,
+            normalizations=YOLOv2Net.default_params.normalizations,
             is_training=True,
             dropout_keep_prob=0.5,
             prediction_fn=slim.softmax,
@@ -519,10 +519,10 @@ def ssd_net(inputs,
             localisations.append(l)
 
         return predictions, localisations, logits, end_points
-ssd_net.default_image_size = 300
+yolov2_net.default_image_size = 300
 
 
-def ssd_arg_scope(weight_decay=0.0005, data_format='NHWC'):
+def yolov2_arg_scope(weight_decay=0.0005, data_format='NHWC'):
     """Defines the VGG arg scope.
 
     Args:
@@ -549,7 +549,7 @@ def ssd_arg_scope(weight_decay=0.0005, data_format='NHWC'):
 # =========================================================================== #
 # Caffe scope: importing weights at initialization.
 # =========================================================================== #
-def ssd_arg_scope_caffe(caffe_scope):
+def yolov2_arg_scope_caffe(caffe_scope):
     """Caffe scope definition.
 
     Args:
@@ -575,7 +575,7 @@ def ssd_arg_scope_caffe(caffe_scope):
 # =========================================================================== #
 # SSD loss function.
 # =========================================================================== #
-def ssd_losses(logits, localisations,
+def yolov2_losses(logits, localisations,
                gclasses, glocalisations, gscores,
                match_threshold=0.5,
                negative_ratio=3.,
@@ -583,7 +583,7 @@ def ssd_losses(logits, localisations,
                label_smoothing=0.,
                device='/cpu:0',
                scope=None):
-    with tf.name_scope(scope, 'ssd_losses'):
+    with tf.name_scope(scope, 'yolov2_losses'):
         lshape = tfe.get_shape(logits[0], 5)
         num_classes = lshape[-1]
         batch_size = lshape[0]
@@ -656,7 +656,7 @@ def ssd_losses(logits, localisations,
             tf.losses.add_loss(loss)
 
 
-def ssd_losses_old(logits, localisations,
+def yolov2_losses_old(logits, localisations,
                    gclasses, glocalisations, gscores,
                    match_threshold=0.5,
                    negative_ratio=3.,
@@ -677,7 +677,7 @@ def ssd_losses_old(logits, localisations,
       gscores: (list of) groundtruth score Tensors;
     """
     with tf.device(device):
-        with tf.name_scope(scope, 'ssd_losses'):
+        with tf.name_scope(scope, 'yolov2_losses'):
             l_cross_pos = []
             l_cross_neg = []
             l_loc = []

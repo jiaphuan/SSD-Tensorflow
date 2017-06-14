@@ -38,7 +38,7 @@ networks_map = {'vgg_a': vgg.vgg_a,
                 'ssd_300_vgg_caffe': ssd_vgg_300.ssd_net,
                 'ssd_512_vgg': ssd_vgg_512.ssd_net,
                 'ssd_512_vgg_caffe': ssd_vgg_512.ssd_net,
-                'yolov2_416': yolov2_416.ssd_net,
+                'yolov2_416': yolov2_416.yolov2_net,
                 }
 
 arg_scopes_map = {'vgg_a': vgg.vgg_arg_scope,
@@ -48,12 +48,12 @@ arg_scopes_map = {'vgg_a': vgg.vgg_arg_scope,
                   'ssd_300_vgg_caffe': ssd_vgg_300.ssd_arg_scope_caffe,
                   'ssd_512_vgg': ssd_vgg_512.ssd_arg_scope,
                   'ssd_512_vgg_caffe': ssd_vgg_512.ssd_arg_scope_caffe,
-                  'yolov2_416': yolov2_416.ssd_arg_scope,
+                  'yolov2_416': yolov2_416.yolov2_arg_scope,
                   }
 
 networks_obj = {'ssd_300_vgg': ssd_vgg_300.SSDNet,
                 'ssd_512_vgg': ssd_vgg_512.SSDNet,
-                'yolov2_416': yolov2_416.SSDNet,
+                'yolov2_416': yolov2_416.YOLOv2Net,
                 }
 
 
