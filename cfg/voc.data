@@ -1,0 +1,6 @@
+classes= 20
+train  = /home/jph/data/VOC/train.txt
+valid  = /home/jph/data/VOC/2007_test.txt
+names = data/voc.names
+backup = backup
+
