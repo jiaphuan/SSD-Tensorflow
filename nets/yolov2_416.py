@@ -58,6 +58,11 @@ import tf_extended as tfe
 from nets import custom_layers
 from nets import ssd_common
 
+from nets.darknet_common import cfg_yielder
+from nets.darknet_common import create_darkop
+from nets.darknet_common import create_loader
+from nets.darknet_common import op_create
+
 slim = tf.contrib.slim
 
 
@@ -133,7 +138,7 @@ class YOLOv2Net(object):
             self.params = YOLOv2Net.default_params
 
     # ======================================================================= #
-    def net(self, inputs, cfg,
+    def net(self, inputs, cfg, weights_path=None,
             is_training=True,
             update_feat_shapes=True,
             dropout_keep_prob=0.5,
@@ -142,7 +147,7 @@ class YOLOv2Net(object):
             scope='ssd_300_vgg'):
         """SSD network definition.
         """
-        r = yolov2_net(inputs, cfg,
+        r = yolov2_net(inputs, cfg, weights_path,
                     num_classes=self.params.num_classes,
                     feat_layers=self.params.feat_layers,
                     anchor_sizes=self.params.anchor_sizes,
@@ -429,7 +434,7 @@ def ssd_multibox_layer(inputs,
     return cls_pred, loc_pred
 
 
-def yolov2_net(inputs, cfg,
+def yolov2_net(inputs, cfg, weights_path,
             num_classes=YOLOv2Net.default_params.num_classes,
             feat_layers=YOLOv2Net.default_params.feat_layers,
             anchor_sizes=YOLOv2Net.default_params.anchor_sizes,
@@ -444,6 +449,38 @@ def yolov2_net(inputs, cfg,
     """
     # if data_format == 'NCHW':
     #     inputs = tf.transpose(inputs, perm=(0, 3, 1, 2))
+
+    meta = dict(); layers = list()
+    for i, layer in enumerate(cfg_yielder(cfg, None)):
+        if i == 0: meta = layer; continue
+        else: new = create_darkop(*layer)
+        layers.append(new)
+
+    wgts_loader = create_loader(weights_path, layers)
+    for layer in layers: layer.load(wgts_loader)
+
+    with tf.variable_scope(scope, 'yolov2_416', [inputs], reuse=reuse):
+        # Build the forward pass
+        state = tf.identity(inputs)
+        roof = len(layers)  # train all layers by default
+        feed = dict{}
+        for i, layer in enumerate(layers):
+                scope = '{}-{}'.format(str(i),layer.type)
+                args = [layer, state, i, roof, feed]
+                state = op_create(*args)
+
+        for key in feed:
+            print(key, feed[key])
+
+        out = tf.identity(state.out, name='output')
+
+        end_points = {'out': out}
+        predictions = [out]
+        logits = [out]
+        localisations = []
+
+        #return predictions, localisations, logits, end_points
+
 
     # End_points collect relevant activations for external use.
     end_points = {}
