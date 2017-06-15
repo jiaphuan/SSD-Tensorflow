@@ -25,6 +25,6 @@ python3 eval_ssd_network.py --eval_dir=/home/jph/code/SSD-Tensorflow/ckpt/models
 
 
 ## debug YOLOV2 merge
-python3 train_yolov2_network.py --train_dir=/home/jph/exp/yolov2_debug --dataset_dir=/home/jph/data/TF/voc0712 --dataset_name=pascalvoc_0712 --dataset_split_name=train --model_name=yolov2_416 --checkpoint_model_scope=ssd_300_vgg --save_summaries_secs=60 --save_interval_secs=600 --weight_decay=0.0005 --optimizer=adam --learning_rate=0.00001 --learning_rate_decay_factor=0.94 --batch_size=32 --preprocessing_name=ssd_300_vgg
+python3 train_yolov2_network.py --train_dir=/home/jph/exp/yolov2_debug --dataset_dir=/home/jph/data/TF/voc0712 --dataset_name=pascalvoc_0712 --dataset_split_name=train --model_name=yolov2_416 --checkpoint_model_scope=ssd_300_vgg --save_summaries_secs=60 --save_interval_secs=600 --weight_decay=0.0005 --optimizer=adam --learning_rate=0.00001 --learning_rate_decay_factor=0.94 --batch_size=32 --preprocessing_name=ssd_300_vgg --darknet_cfg=/home/jph/code/SSD-Tensorflow-dev/cfg/yolo-voc.2.0.cfg
 
 

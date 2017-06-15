@@ -145,6 +145,10 @@ tf.app.flags.DEFINE_integer(
 tf.app.flags.DEFINE_string(
     'model_name', 'yolov2_416', 'The name of the architecture to train.')
 tf.app.flags.DEFINE_string(
+    'darknet_cfg', None, 'darknet cfg file')
+tf.app.flags.DEFINE_string(
+    'darknet_weight', None, 'darknet pre-trained weight file')
+tf.app.flags.DEFINE_string(
     'preprocessing_name', None, 'The name of the preprocessing to use. If left '
     'as `None`, then the model_name flag is used.')
 tf.app.flags.DEFINE_integer(
@@ -272,7 +276,7 @@ def main(_):
                                           data_format=DATA_FORMAT)
             with slim.arg_scope(arg_scope):
                 predictions, localisations, logits, end_points = \
-                    yolov2_net.net(b_image, is_training=True)
+                    yolov2_net.net(b_image, FLAGS.darknet_cfg, is_training=True)
             # Add loss function.
             yolov2_net.losses(logits, localisations,
                            b_gclasses, b_glocalisations, b_gscores,

@@ -133,7 +133,7 @@ class YOLOv2Net(object):
             self.params = YOLOv2Net.default_params
 
     # ======================================================================= #
-    def net(self, inputs,
+    def net(self, inputs, cfg,
             is_training=True,
             update_feat_shapes=True,
             dropout_keep_prob=0.5,
@@ -142,7 +142,7 @@ class YOLOv2Net(object):
             scope='ssd_300_vgg'):
         """SSD network definition.
         """
-        r = yolov2_net(inputs,
+        r = yolov2_net(inputs, cfg,
                     num_classes=self.params.num_classes,
                     feat_layers=self.params.feat_layers,
                     anchor_sizes=self.params.anchor_sizes,
@@ -429,7 +429,7 @@ def ssd_multibox_layer(inputs,
     return cls_pred, loc_pred
 
 
-def yolov2_net(inputs,
+def yolov2_net(inputs, cfg,
             num_classes=YOLOv2Net.default_params.num_classes,
             feat_layers=YOLOv2Net.default_params.feat_layers,
             anchor_sizes=YOLOv2Net.default_params.anchor_sizes,
